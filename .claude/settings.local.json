@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx @biomejs/biome lint:*)",
+      "mcp__plugin_accesslint_accesslint__analyze_color_pair",
+      "mcp__plugin_accesslint_accesslint__suggest_accessible_color",
+      "mcp__plugin_accesslint_accesslint__calculate_contrast_ratio"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
