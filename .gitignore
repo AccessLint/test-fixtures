@@ -1,35 +1,52 @@
 # Dependencies
 node_modules/
-/.pnp
-.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-debug.log*
 
-# Testing
-/coverage
-
-# Production
+# Production builds
 build/
 dist/
+out/
+*.log
 
-# Misc
-.DS_Store
+# Testing
+coverage/
+.nyc_output/
+
+# Environment variables
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-loglevel.log
-
-# IDE
+# IDEs and editors
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~
+*.sublime-project
+*.sublime-workspace
 
-# OS
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+
+# Misc
+.cache/
+.temp/
+.tmp/
+*.pid
+*.seed
+*.pid.lock
