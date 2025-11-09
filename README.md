@@ -4,7 +4,7 @@ A sample application repository for accessibility testing, designed to demonstra
 
 ## 🌐 Live Demo
 
-**https://test-fixtures.netlify.app/**
+**https://accesslint-test-fixtures.netlify.app/**
 
 Use this live deployment to test accessibility features with AccessLint tools without any local setup required.
 
