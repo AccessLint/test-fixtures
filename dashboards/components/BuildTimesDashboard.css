@@ -1,3 +1,19 @@
+/* Global focus indicator - ensures all focusable elements have visible focus */
+*:focus {
+  outline: 2px solid #4299e1;
+  outline-offset: 2px;
+}
+
+/* For browsers that support :focus-visible, only show outline for keyboard focus */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid #4299e1;
+  outline-offset: 2px;
+}
+
 .build-times-dashboard {
   max-width: 1400px;
   margin: 0 auto;
@@ -165,10 +181,11 @@
 }
 
 .search-input:focus {
-  outline: none;
-  border-color: #718096;
+  outline: 2px solid #4299e1;
+  outline-offset: 2px;
+  border-color: #4299e1;
   background: white;
-  box-shadow: 0 0 0 3px rgba(113, 128, 150, 0.1);
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
 }
 
 .search-input::placeholder {
