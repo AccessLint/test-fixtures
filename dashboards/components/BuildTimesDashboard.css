@@ -126,6 +126,23 @@
 
 .chart-bar-failed {
   background: linear-gradient(to top, #fc8181, #f56565);
+  position: relative;
+}
+
+/* Add diagonal stripe pattern to failed builds for colorblind accessibility */
+.chart-bar-failed::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(0, 0, 0, 0.15) 4px,
+    rgba(0, 0, 0, 0.15) 8px
+  );
+  border-radius: 4px 4px 0 0;
+  pointer-events: none;
 }
 
 .chart-label {
