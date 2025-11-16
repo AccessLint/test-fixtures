@@ -201,6 +201,19 @@ const BuildTimesDashboard = () => {
     }
   };
 
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'success':
+        return 'Success';
+      case 'failed':
+        return 'Failed';
+      case 'running':
+        return 'Running';
+      default:
+        return status;
+    }
+  };
+
   // Custom Dropdown Component
   const CustomDropdown = ({ id, value, options, onChange, placeholder }) => {
     const isOpen = openDropdown === id;
@@ -407,7 +420,8 @@ const BuildTimesDashboard = () => {
                   <td className="branch-name">{build.branch}</td>
                   <td className="commit-hash">{build.commit}</td>
                   <td>
-                    <span className={`status-badge ${getStatusClass(build.status)}`} title={build.status}>
+                    <span className={`status-badge ${getStatusClass(build.status)}`}>
+                      {getStatusText(build.status)}
                     </span>
                   </td>
                   <td className="build-duration">{formatDuration(build.buildTime)}</td>
