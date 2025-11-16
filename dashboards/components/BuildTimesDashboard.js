@@ -312,13 +312,21 @@ const BuildTimesDashboard = () => {
       {/* Filters and Search */}
       <div className="controls-container">
         <div className="search-box">
+          <label htmlFor="build-search" className="sr-only">
+            Search builds
+          </label>
           <input
             type="text"
+            id="build-search"
             placeholder="Search builds..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
+            aria-describedby="search-help"
           />
+          <span id="search-help" className="sr-only">
+            Search by build ID, branch name, commit hash, or triggered by
+          </span>
         </div>
 
         <div className="filters">
