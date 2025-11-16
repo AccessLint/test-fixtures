@@ -259,7 +259,8 @@ const BuildTimesDashboard = () => {
         <p className="dashboard-subtitle">Monitor and track your continuous integration builds</p>
       </header>
 
-      <div className="stats-container">
+      <main>
+        <div className="stats-container">
         <div className="stat-card">
           <div className="stat-icon">📊</div>
           <div className="stat-content">
@@ -469,6 +470,7 @@ const BuildTimesDashboard = () => {
           </tbody>
         </table>
       </div>
+      </main>
     </div>
   );
 };
