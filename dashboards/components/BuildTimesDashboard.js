@@ -228,25 +228,31 @@ const BuildTimesDashboard = () => {
 
     return (
       <div className="custom-dropdown">
-        <div
+        <button
           className="dropdown-trigger"
           onClick={toggleDropdown}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+          aria-controls={`${id}-listbox`}
+          aria-label={placeholder}
         >
           <span>{selectedOption?.label || placeholder}</span>
-          <span className="dropdown-arrow">{isOpen ? '▲' : '▼'}</span>
-        </div>
+          <span className="dropdown-arrow" aria-hidden="true">{isOpen ? '▲' : '▼'}</span>
+        </button>
         {isOpen && (
-          <div className="dropdown-menu">
+          <ul className="dropdown-menu" role="listbox" id={`${id}-listbox`}>
             {options.map((option) => (
-              <div
+              <li
                 key={option.value}
+                role="option"
+                aria-selected={value === option.value}
                 className={`dropdown-item ${value === option.value ? 'selected' : ''}`}
                 onClick={() => handleSelect(option.value)}
               >
                 {option.label}
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
       </div>
     );
@@ -371,23 +377,35 @@ const BuildTimesDashboard = () => {
         <table className="builds-table">
           <thead>
             <tr>
-              <th></th>
-              <th onClick={() => handleSort('id')} className="sortable">
-                Build ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+              <th scope="col">
+                <span className="sr-only">Expand details</span>
               </th>
-              <th onClick={() => handleSort('branch')} className="sortable">
-                Branch {sortConfig.key === 'branch' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+              <th scope="col">
+                <button onClick={() => handleSort('id')} className="sortable">
+                  Build ID <span aria-hidden="true">{sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</span>
+                </button>
               </th>
-              <th>Commit</th>
-              <th onClick={() => handleSort('status')} className="sortable">
-                Status {sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+              <th scope="col">
+                <button onClick={() => handleSort('branch')} className="sortable">
+                  Branch <span aria-hidden="true">{sortConfig.key === 'branch' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</span>
+                </button>
               </th>
-              <th onClick={() => handleSort('buildTime')} className="sortable">
-                Duration {sortConfig.key === 'buildTime' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+              <th scope="col">Commit</th>
+              <th scope="col">
+                <button onClick={() => handleSort('status')} className="sortable">
+                  Status <span aria-hidden="true">{sortConfig.key === 'status' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</span>
+                </button>
               </th>
-              <th>Triggered By</th>
-              <th onClick={() => handleSort('timestamp')} className="sortable">
-                Time {sortConfig.key === 'timestamp' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+              <th scope="col">
+                <button onClick={() => handleSort('buildTime')} className="sortable">
+                  Duration <span aria-hidden="true">{sortConfig.key === 'buildTime' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</span>
+                </button>
+              </th>
+              <th scope="col">Triggered By</th>
+              <th scope="col">
+                <button onClick={() => handleSort('timestamp')} className="sortable">
+                  Time <span aria-hidden="true">{sortConfig.key === 'timestamp' && (sortConfig.direction === 'asc' ? '↑' : '↓')}</span>
+                </button>
               </th>
             </tr>
           </thead>
@@ -396,12 +414,15 @@ const BuildTimesDashboard = () => {
               <React.Fragment key={build.id}>
                 <tr className={expandedBuild === build.id ? 'expanded-row' : ''}>
                   <td>
-                    <div
+                    <button
                       onClick={() => toggleBuildExpansion(build.id)}
                       className="expand-button"
+                      aria-expanded={expandedBuild === build.id}
+                      aria-controls={`${build.id}-details`}
+                      aria-label={`${expandedBuild === build.id ? 'Collapse' : 'Expand'} details for ${build.id}`}
                     >
-                      {expandedBuild === build.id ? '▼' : '▶'}
-                    </div>
+                      <span aria-hidden="true">{expandedBuild === build.id ? '▼' : '▶'}</span>
+                    </button>
                   </td>
                   <td className="build-id">{build.id}</td>
                   <td className="branch-name">{build.branch}</td>
@@ -415,7 +436,7 @@ const BuildTimesDashboard = () => {
                   <td className="timestamp">{formatTimestamp(build.timestamp)}</td>
                 </tr>
                 {expandedBuild === build.id && (
-                  <tr className="detail-row">
+                  <tr className="detail-row" id={`${build.id}-details`}>
                     <td colSpan="8">
                       <div className="build-details">
                         <div className="detail-section">
