@@ -295,12 +295,16 @@ const BuildTimesDashboard = () => {
           {chartData.map((build, idx) => {
             const maxTime = Math.max(...chartData.map(b => b.buildTime));
             const height = (build.buildTime / maxTime) * 100;
+            const statusText = getStatusText(build.status);
+            const durationText = formatDuration(build.buildTime);
             return (
               <div key={build.id} className="chart-bar-wrapper">
                 <div
                   className={`chart-bar ${build.status === 'failed' ? 'chart-bar-failed' : ''}`}
                   style={{ height: `${height}%` }}
-                  title={`${build.id}: ${formatDuration(build.buildTime)}`}
+                  role="img"
+                  aria-label={`${build.id}: ${durationText}, Status: ${statusText}`}
+                  title={`${build.id}: ${durationText} - ${statusText}`}
                 />
                 <div className="chart-label">{idx % 3 === 0 ? `#${build.id.split('-')[1]}` : ''}</div>
               </div>
