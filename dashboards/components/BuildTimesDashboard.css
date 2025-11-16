@@ -492,16 +492,27 @@
   font-size: 13px;
 }
 
-/* Status Badges - Subtle Colors */
+/* Status Badges - With Text Labels */
 .status-badge {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.status-badge::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .status-success {
@@ -510,16 +521,28 @@
   border: 1px solid #9ae6b4;
 }
 
+.status-success::before {
+  background-color: #38a169;
+}
+
 .status-failed {
   background-color: #fed7d7;
   color: #742a2a;
   border: 1px solid #fc8181;
 }
 
+.status-failed::before {
+  background-color: #e53e3e;
+}
+
 .status-running {
   background-color: #feebc8;
   color: #7c2d12;
   border: 1px solid #fbd38d;
+}
+
+.status-running::before {
+  background-color: #ed8936;
   animation: pulse 2s ease-in-out infinite;
 }
 
