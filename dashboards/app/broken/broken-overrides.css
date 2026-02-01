@@ -1,0 +1,112 @@
+/* Broken responsive overrides for testing resize/reflow issues */
+
+@media (max-width: 768px) {
+  .builds-table-container {
+    overflow-x: visible !important;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(4, 250px) !important;
+  }
+
+  .dashboard-header h1 {
+    font-size: 48px !important;
+    white-space: nowrap !important;
+  }
+
+  .controls-container {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    min-width: 900px !important;
+  }
+
+  .search-box {
+    width: 500px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .filters {
+    flex-wrap: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .custom-dropdown {
+    width: 200px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .chart-container {
+    min-width: 800px !important;
+  }
+
+  .build-details {
+    min-width: 700px !important;
+  }
+
+  .build-actions {
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .stats-container {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+  }
+
+  .stat-card {
+    padding: 8px !important;
+    min-width: 200px !important;
+  }
+}
+
+/* A11y issue: low contrast text throughout */
+.dashboard-subtitle {
+  color: #c8d1db !important;
+}
+
+.stat-label {
+  color: #cbd5e0 !important;
+}
+
+.timestamp {
+  color: #cbd5e0 !important;
+}
+
+.commit-hash {
+  color: #cbd5e0 !important;
+}
+
+.results-count {
+  color: #c8d1db !important;
+}
+
+.chart-label {
+  color: #d4dce6 !important;
+}
+
+/* A11y issue: remove all focus outlines */
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* A11y issue: tiny click targets on mobile */
+@media (max-width: 768px) {
+  .expand-button {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 8px !important;
+  }
+
+  .btn-sm {
+    padding: 2px 4px !important;
+    font-size: 10px !important;
+  }
+
+  .dropdown-trigger {
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+  }
+}
