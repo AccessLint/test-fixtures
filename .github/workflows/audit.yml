@@ -1,0 +1,64 @@
+name: Accessibility audit
+
+# Audits the deployed CI Dashboard fixture (a Next.js app with documented
+# WCAG violations) using AccessLint/audit. Runs on every push, PR, and
+# daily so we catch regressions in either the action or the fixture.
+#
+# This repo's whole purpose is demonstrating AccessLint — the workflow
+# doubles as a working example consumers can copy.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 12 * * *" # daily 12:00 UTC
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cache chromium-headless-shell
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}
+
+      - uses: AccessLint/audit@v0
+        id: a11y
+        with:
+          url: https://accesslint-test-fixtures.netlify.app/
+          # The fixture is *intentionally* broken — drop to `minor` so the
+          # report surfaces every documented violation, not just the
+          # critical/serious ones.
+          min-impact: minor
+
+      - name: Show outputs
+        run: |
+          echo "violation-count: ${{ steps.a11y.outputs.violation-count }}"
+          echo "critical:        ${{ steps.a11y.outputs.critical-count }}"
+          echo "serious:         ${{ steps.a11y.outputs.serious-count }}"
+          echo "failed:          ${{ steps.a11y.outputs.failed }}"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accesslint-report-${{ github.run_id }}
+          path: |
+            accesslint-report.json
+            accesslint-report.md
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: a11y
+          path: accesslint-report.md
