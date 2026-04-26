@@ -14,7 +14,7 @@
   publish = "dashboards/.next"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "24"
 
 # Deploy previews are on by default; declared here so it survives a
 # Netlify dashboard mis-toggle and is reproducible on a fresh fork.
