@@ -16,6 +16,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 jobs:
@@ -24,9 +25,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    defaults:
-      run:
-        working-directory: dashboards
     steps:
       - uses: actions/checkout@v6
 
@@ -37,8 +35,10 @@ jobs:
           cache-dependency-path: dashboards/package-lock.json
 
       - run: npm ci
+        working-directory: dashboards
 
       - name: Start dev server in the background
+        working-directory: dashboards
         run: |
           # nohup + & detaches the dev server from this step. Logs are
           # tail-able from later steps and uploaded as an artifact for
@@ -55,9 +55,6 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}
 
-      # `working-directory` only applies to `run:` steps — composite/action
-      # steps ignore it. The audit action writes reports to $GITHUB_WORKSPACE
-      # (its `output-dir` default) regardless of where this step "runs".
       - uses: AccessLint/audit@v0
         id: a11y
         with:
@@ -69,7 +66,6 @@ jobs:
           wait-for: load
 
       - name: Show outputs
-        working-directory: ${{ github.workspace }}
         run: |
           echo "violation-count: ${{ steps.a11y.outputs.violation-count }}"
           echo "critical:        ${{ steps.a11y.outputs.critical-count }}"
@@ -81,7 +77,6 @@ jobs:
 
       - name: Upload report artifact
         if: always()
-        working-directory: ${{ github.workspace }}
         uses: actions/upload-artifact@v4
         with:
           name: accesslint-report-dev-${{ github.run_id }}
@@ -100,7 +95,6 @@ jobs:
 
       - name: Comment on PR
         if: github.event_name == 'pull_request'
-        working-directory: ${{ github.workspace }}
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           # Distinct header — keeps this comment separate from audit-pr.yml's.
