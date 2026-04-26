@@ -38,6 +38,20 @@ This repository contains a **CI Dashboard** sample application built with Next.j
 
 The AccessLint MCP server provides accessibility analysis tools that can be used to audit this sample application programmatically. See the [mcp-server repository](https://github.com/accesslint/mcp-server) for setup and usage instructions.
 
+### With GitHub Actions (this repo's workflows)
+
+This repo runs two workflows that double as copy-paste references:
+
+- [`.github/workflows/audit.yml`](.github/workflows/audit.yml) — audits the **production** Netlify deployment on every push to `main` and on a daily schedule.
+- [`.github/workflows/audit-pr.yml`](.github/workflows/audit-pr.yml) — audits the **PR preview** on every pull request. Waits for Netlify to publish the deploy preview URL, runs [`AccessLint/audit`](https://github.com/AccessLint/audit) against it, uploads the report as an artifact, and sticky-comments the markdown summary on the PR.
+
+The PR-preview workflow uses [`JakePartusch/wait-for-netlify-action`](https://github.com/JakePartusch/wait-for-netlify-action) (token-less, polls the URL). Teams that prefer the official Netlify API can swap in [`probablyup/wait-for-netlify-action`](https://github.com/probablyup/wait-for-netlify-action) — see the comment in `audit-pr.yml`.
+
+Required Netlify setup (one-time):
+1. Connect this repo to Netlify (already done for `accesslint-test-fixtures.netlify.app`).
+2. Confirm "Deploy previews" is enabled in the site's Build & deploy settings (default for new sites).
+3. The `netlify.toml` at the repo root pins the build settings so previews are reproducible across forks.
+
 ## 🔍 Accessibility Issues Demonstrated
 
 This sample app intentionally includes common accessibility issues to demonstrate AccessLint's detection and remediation capabilities. Below are the categories and specific examples of failures present in the dashboard.

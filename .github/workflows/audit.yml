@@ -1,16 +1,13 @@
-name: Accessibility audit
+name: Accessibility audit (production)
 
-# Audits the deployed CI Dashboard fixture (a Next.js app with documented
-# WCAG violations) using AccessLint/audit. Runs on every push, PR, and
-# daily so we catch regressions in either the action or the fixture.
-#
-# This repo's whole purpose is demonstrating AccessLint — the workflow
-# doubles as a working example consumers can copy.
+# Audits the live production deployment of the CI Dashboard fixture
+# on every push to main and daily 12:00 UTC. PR previews are handled
+# separately in audit-pr.yml (which waits for Netlify and audits the
+# deploy preview URL).
 
 on:
   push:
     branches: [main]
-  pull_request:
   schedule:
     - cron: "0 12 * * *" # daily 12:00 UTC
   workflow_dispatch:

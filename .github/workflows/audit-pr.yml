@@ -1,0 +1,76 @@
+name: Audit PR preview
+
+# Composes Netlify deploy previews with AccessLint/audit:
+#
+#   PR opened ─▶ Netlify builds the preview ─▶ this workflow waits for the
+#                preview URL ─▶ AccessLint audits it ─▶ sticky-comment on PR.
+#
+# Doubles as a copy-paste reference for downstream consumers.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  audit-preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Wait for Netlify deploy preview
+        id: netlify
+        # Polls the deploy-preview URL until Netlify reports it ready.
+        # Token-less; relies on Netlify's default deploy-preview pattern
+        # `deploy-preview-<PR>--<site>.netlify.app`.
+        #
+        # Alternative for teams that prefer the Netlify API (more robust,
+        # but requires NETLIFY_TOKEN secret):
+        #   uses: probablyup/wait-for-netlify-action@v3
+        #   with:
+        #     site_id: <NETLIFY_SITE_ID>
+        #     max_timeout: 600
+        uses: JakePartusch/wait-for-netlify-action@v1.4
+        with:
+          site_name: accesslint-test-fixtures
+          max_timeout: 600
+
+      - name: Cache chromium-headless-shell
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}
+
+      - uses: AccessLint/audit@v0
+        id: a11y
+        with:
+          url: ${{ steps.netlify.outputs.url }}
+          # The fixture is intentionally broken — drop to `minor` so the
+          # report surfaces every documented violation, not just critical.
+          min-impact: minor
+
+      - name: Show outputs
+        run: |
+          echo "preview-url:     ${{ steps.netlify.outputs.url }}"
+          echo "violation-count: ${{ steps.a11y.outputs.violation-count }}"
+          echo "critical:        ${{ steps.a11y.outputs.critical-count }}"
+          echo "serious:         ${{ steps.a11y.outputs.serious-count }}"
+          echo "failed:          ${{ steps.a11y.outputs.failed }}"
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accesslint-report-pr-${{ github.event.pull_request.number }}
+          path: |
+            accesslint-report.json
+            accesslint-report.md
+          retention-days: 30
+
+      - name: Comment on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: a11y
+          path: accesslint-report.md

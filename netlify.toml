@@ -1,0 +1,23 @@
+# Netlify configuration for AccessLint test-fixtures.
+#
+# The Next.js dashboard in `dashboards/` is the deployed site. PR
+# previews are emitted automatically at:
+#
+#   https://deploy-preview-<PR-NUMBER>--accesslint-test-fixtures.netlify.app/
+#
+# The .github/workflows/audit-pr.yml workflow waits for that URL and
+# pipes it to AccessLint/audit.
+
+[build]
+  base    = "dashboards"
+  command = "npm run build"
+  publish = "dashboards/.next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Deploy previews are on by default; declared here so it survives a
+# Netlify dashboard mis-toggle and is reproducible on a fresh fork.
+[context.deploy-preview]
+
+[context.production]
