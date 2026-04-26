@@ -1,0 +1,115 @@
+name: Audit dev server
+
+# Composes a local dev-server boot with AccessLint/audit. The dev build
+# ships React DevTools fiber metadata + sourcemaps, so each violation's
+# `Source:` column points at the actual .tsx line — the column is `—`
+# in the prod-deployment audit because Netlify doesn't ship sourcemaps.
+#
+# This workflow is the strongest demo of AccessLint's source-mapping
+# story: violations land with `src/components/Card.tsx:42:7 (Card)` in
+# the report, ready for an agent or human to open and fix.
+#
+# Doubles as a copy-paste reference for consumers whose CI doesn't have
+# a preview-deployment system. Just `npm run dev` + audit.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  audit-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: dashboards
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: dashboards/package-lock.json
+
+      - run: npm ci
+
+      - name: Start dev server in the background
+        run: |
+          # nohup + & detaches the dev server from this step. Logs are
+          # tail-able from later steps and uploaded as an artifact for
+          # debugging when the server fails to come up.
+          nohup npm run dev > /tmp/dev-server.log 2>&1 &
+          echo "DEV_PID=$!" >> "$GITHUB_ENV"
+
+      - name: Wait for dev server
+        run: npx --yes wait-on -t 90000 http://localhost:3000
+
+      - name: Cache chromium-headless-shell
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}
+
+      # `working-directory` only applies to `run:` steps — composite/action
+      # steps ignore it. The audit action writes reports to $GITHUB_WORKSPACE
+      # (its `output-dir` default) regardless of where this step "runs".
+      - uses: AccessLint/audit@v0
+        id: a11y
+        with:
+          url: http://localhost:3000
+          # Fixture is intentionally broken — surface every documented violation.
+          min-impact: minor
+          # Next.js dev sometimes finishes painting after networkidle fires
+          # for the initial bundle; wait a beat for the React tree to mount.
+          wait-for: load
+
+      - name: Show outputs
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo "violation-count: ${{ steps.a11y.outputs.violation-count }}"
+          echo "critical:        ${{ steps.a11y.outputs.critical-count }}"
+          echo "serious:         ${{ steps.a11y.outputs.serious-count }}"
+          echo "failed:          ${{ steps.a11y.outputs.failed }}"
+          echo
+          echo "First few Source: lines (proves fiber probe + sourcemaps work):"
+          jq -r '.violations[] | select(.source) | "  " + .source[0].file + ":" + (.source[0].line|tostring) + " (" + (.source[0].symbol // "—") + ")"' accesslint-report.json | head -10 || true
+
+      - name: Upload report artifact
+        if: always()
+        working-directory: ${{ github.workspace }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: accesslint-report-dev-${{ github.run_id }}
+          path: |
+            accesslint-report.json
+            accesslint-report.md
+          retention-days: 30
+
+      - name: Upload dev-server log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-server-log-${{ github.run_id }}
+          path: /tmp/dev-server.log
+          retention-days: 7
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        working-directory: ${{ github.workspace }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          # Distinct header — keeps this comment separate from audit-pr.yml's.
+          header: a11y-dev
+          path: accesslint-report.md
+
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -n "${DEV_PID:-}" ]; then
+            kill "$DEV_PID" 2>/dev/null || true
+          fi

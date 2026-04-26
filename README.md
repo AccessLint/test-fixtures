@@ -40,10 +40,11 @@ The AccessLint MCP server provides accessibility analysis tools that can be used
 
 ### With GitHub Actions (this repo's workflows)
 
-This repo runs two workflows that double as copy-paste references:
+This repo runs three workflows that double as copy-paste references:
 
-- [`.github/workflows/audit.yml`](.github/workflows/audit.yml) — audits the **production** Netlify deployment on every push to `main` and on a daily schedule.
+- [`.github/workflows/audit.yml`](.github/workflows/audit.yml) — audits the **production** Netlify deployment on every push to `main` and on a daily schedule. `Source:` column is `—` because the prod build doesn't ship sourcemaps.
 - [`.github/workflows/audit-pr.yml`](.github/workflows/audit-pr.yml) — audits the **PR preview** on every pull request. Waits for Netlify to publish the deploy preview URL, runs [`AccessLint/audit`](https://github.com/AccessLint/audit) against it, uploads the report as an artifact, and sticky-comments the markdown summary on the PR.
+- [`.github/workflows/audit-dev.yml`](.github/workflows/audit-dev.yml) — boots the Next.js **dev server** (`npm run dev`) and audits `localhost:3000`. The dev build ships React DevTools fiber metadata + sourcemaps, so each violation's `Source:` column points at the actual `.tsx` line — agents can open and fix the file directly. Best demo of AccessLint's source-mapping story.
 
 The PR-preview workflow uses [`JakePartusch/wait-for-netlify-action`](https://github.com/JakePartusch/wait-for-netlify-action) (token-less, polls the URL). Teams that prefer the official Netlify API can swap in [`probablyup/wait-for-netlify-action`](https://github.com/probablyup/wait-for-netlify-action) — see the comment in `audit-pr.yml`.
 
