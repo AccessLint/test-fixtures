@@ -18,6 +18,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      security-events: write # SARIF → Code Scanning
     steps:
       - uses: actions/checkout@v6
 
@@ -51,7 +52,15 @@ jobs:
           path: |
             accesslint-report.json
             accesslint-report.md
+            accesslint-report.sarif
           retention-days: 30
+
+      - name: Upload SARIF to Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.a11y.outputs.report-sarif-path }}
+          category: accesslint-prod
 
       - name: Comment on PR
         if: github.event_name == 'pull_request'

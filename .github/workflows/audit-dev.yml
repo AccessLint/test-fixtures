@@ -25,6 +25,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      security-events: write # SARIF → Code Scanning (push only; PRs from forks lack this)
     steps:
       - uses: actions/checkout@v6
 
@@ -58,7 +59,11 @@ jobs:
       - uses: AccessLint/audit@v0
         id: a11y
         with:
-          url: http://localhost:3000
+          # Multi-URL: aggregate `/` and `/broken` into one report. Each
+          # URL gets its own H2 section in the markdown; outputs are totals.
+          urls: |
+            http://localhost:3000/
+            http://localhost:3000/broken
           # Fixture is intentionally broken — surface every documented violation.
           min-impact: minor
           # Next.js dev sometimes finishes painting after networkidle fires
@@ -70,7 +75,11 @@ jobs:
           echo "violation-count: ${{ steps.a11y.outputs.violation-count }}"
           echo "critical:        ${{ steps.a11y.outputs.critical-count }}"
           echo "serious:         ${{ steps.a11y.outputs.serious-count }}"
+          echo "annotated:       ${{ steps.a11y.outputs.annotated-count }}"
           echo "failed:          ${{ steps.a11y.outputs.failed }}"
+          echo
+          echo "Per-URL breakdown (multi-URL aggregation works):"
+          jq -r '.urls[] | "  " + .url + " — " + (.filteredViolations|tostring) + " violations"' accesslint-report.json
           echo
           echo "First few Source: lines (proves fiber probe + sourcemaps work):"
           jq -r '.violations[] | select(.source) | "  " + .source[0].file + ":" + (.source[0].line|tostring) + " (" + (.source[0].symbol // "—") + ")"' accesslint-report.json | head -10 || true
@@ -83,7 +92,17 @@ jobs:
           path: |
             accesslint-report.json
             accesslint-report.md
+            accesslint-report.sarif
           retention-days: 30
+
+      - name: Upload SARIF to Code Scanning
+        if: always() && github.event_name != 'pull_request'
+        # PRs from forks can't write to security alerts; gate to push-only.
+        # Also gated on always() so we upload even when fail-on tripped.
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.a11y.outputs.report-sarif-path }}
+          category: accesslint-dev
 
       - name: Upload dev-server log on failure
         if: failure()

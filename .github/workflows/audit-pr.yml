@@ -47,17 +47,21 @@ jobs:
         id: a11y
         with:
           url: ${{ steps.netlify.outputs.url }}
-          # The fixture is intentionally broken — drop to `minor` so the
-          # report surfaces every documented violation, not just critical.
+          # Regression mode: only flag violations *new* in this PR's preview
+          # relative to the live production deploy. Pre-existing issues in
+          # the fixture don't fail PR builds — only regressions do.
+          compare-against: https://accesslint-test-fixtures.netlify.app/
           min-impact: minor
 
       - name: Show outputs
         run: |
           echo "preview-url:     ${{ steps.netlify.outputs.url }}"
-          echo "violation-count: ${{ steps.a11y.outputs.violation-count }}"
+          echo "violation-count: ${{ steps.a11y.outputs.violation-count }} (NEW vs production)"
           echo "critical:        ${{ steps.a11y.outputs.critical-count }}"
           echo "serious:         ${{ steps.a11y.outputs.serious-count }}"
+          echo "annotated:       ${{ steps.a11y.outputs.annotated-count }}"
           echo "failed:          ${{ steps.a11y.outputs.failed }}"
+          jq -r '"regression mode: " + (.regressionMode|tostring) + " (baseline " + (.baseline // "n/a") + ")"' accesslint-report.json
 
       - name: Upload report artifact
         if: always()
@@ -67,6 +71,7 @@ jobs:
           path: |
             accesslint-report.json
             accesslint-report.md
+            accesslint-report.sarif
           retention-days: 30
 
       - name: Comment on PR
