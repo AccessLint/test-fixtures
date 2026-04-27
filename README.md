@@ -1,6 +1,6 @@
 # AccessLint Test Fixtures
 
-A sample application repository for accessibility testing, designed to demonstrate and test the AccessLint tooling ecosystem.
+A sample application repository for accessibility testing, designed to demonstrate and test the AccessLint tooling ecosystem and the [`AccessLint/audit`](https://github.com/AccessLint/audit) GitHub Action.
 
 ## 🌐 Live Demo
 
